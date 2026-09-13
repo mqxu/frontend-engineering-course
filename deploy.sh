@@ -5,6 +5,11 @@
 
 set -euo pipefail
 
+# 推送走 SSH。首次连接 github.com 时 ssh 会交互询问是否信任主机，脚本里要禁掉，
+# 否则命令会一直等输入。accept-new 只自动接受第一次出现的主机密钥，之后若密钥
+# 变化仍会拒绝。
+export GIT_SSH_COMMAND="ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new"
+
 cd "$(dirname "$0")"
 ROOT="$(pwd)"
 
