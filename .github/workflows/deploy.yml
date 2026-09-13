@@ -1,0 +1,81 @@
+# 构建 VitePress 教程站点并发布到 GitHub Pages（通过 GitHub Actions）
+#
+# ⚠️ 目前这个工作流不参与发布，默认只手动触发。
+#
+# 原因：mqxu 这个账号名下的仓库分配不到 Actions runner。2026-09-13 部署时
+# 实测过，连一个只跑 `echo` 的最小工作流都会失败，症状是：
+#   job 状态 completed/failure、runner_name 为空、steps 数量为 0、9 秒内结束
+# 也就是任务根本没被任何 runner 接收，属于账号层面的限制，不是工作流写法的问题。
+# （同样内容的文件在本机和生产环境都能正常构建，见 README“部署”一节。）
+#
+# 所以当前的发布方式是：本地构建 → 推送产物到 gh-pages 分支 → Pages 从分支读取。
+# 一条命令完成：./deploy.sh
+#
+# 如果以后 Actions 能用了（比如账号计费或权限问题解决了），
+# 把下面 on 里的 push 那一行取消注释，再在仓库 Settings → Pages
+# 把 Source 从 “Deploy from a branch / gh-pages” 改回 “GitHub Actions” 即可。
+
+name: Deploy course site to Pages
+
+on:
+  # push:
+  #   branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # lastUpdated 需要完整的 git 历史，别改成 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Cache VitePress
+        uses: actions/cache@v4
+        with:
+          path: docs/.vitepress/cache
+          key: ${{ runner.os }}-vitepress-${{ hashFiles('docs/**', 'package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-vitepress-
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build with VitePress
+        run: npm run build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/.vitepress/dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: build
+    runs-on: ubuntu-latest
+    name: Deploy
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

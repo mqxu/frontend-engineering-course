@@ -1,0 +1,18 @@
+{
+  "name": "fe-engineering-course",
+  "private": true,
+  "type": "module",
+  "description": "前端工程化开发（48 学时）配套教程站点",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "dev": "vitepress dev docs",
+    "build": "vitepress build docs",
+    "preview": "vitepress preview docs"
+  },
+  "devDependencies": {
+    "vitepress": "1.6.4",
+    "vue": "^3.5.42"
+  }
+}
