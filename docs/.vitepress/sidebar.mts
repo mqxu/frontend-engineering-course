@@ -8,6 +8,7 @@ type Item = DefaultTheme.SidebarItem
 const guide: Item[] = [
   { text: '课程导读', link: '/guide/' },
   { text: '怎么用这套教程', link: '/guide/how-to-use' },
+  { text: 'AI 编程：用之前先知道它的边界', link: '/guide/ai-coding' },
   { text: '前端学习路线', link: '/guide/learning-path' },
   { text: '开发环境准备', link: '/guide/environment' },
   { text: '12 周课程地图', link: '/guide/roadmap' }
@@ -25,6 +26,7 @@ const units: Record<number, { title: string; items: Item[] }> = {
       { text: '1.2 一个现代前端工程长什么样', link: '/unit01/02-modern-project' },
       { text: '1.3 学习路线与岗位方向', link: '/unit01/03-learning-path' },
       { text: '1.4 开发环境搭建与自检', link: '/unit01/04-environment' },
+      { text: 'AI 协作 · 让 AI 帮你调研与排错', link: '/unit01/ai-collaboration' },
       { text: '课后练习', link: '/unit01/practice' }
     ]
   },
@@ -37,6 +39,7 @@ const units: Record<number, { title: string; items: Item[] }> = {
       { text: '2.3 package.json 逐字段精讲', link: '/unit02/03-package-json' },
       { text: '2.4 构建工具与 Vite', link: '/unit02/04-vite' },
       { text: '2.5 环境变量与常用配置', link: '/unit02/05-env-config' },
+      { text: 'AI 协作 · 依赖与版本别交给 AI 记', link: '/unit02/ai-collaboration' },
       { text: '课后练习', link: '/unit02/practice' }
     ]
   },
@@ -49,6 +52,7 @@ const units: Record<number, { title: string; items: Item[] }> = {
       { text: '3.3 模块化与目录组织', link: '/unit03/03-modules-structure' },
       { text: '3.4 Git 协作流程', link: '/unit03/04-git-flow' },
       { text: '3.5 自动构建流水线', link: '/unit03/05-ci' },
+      { text: 'AI 协作 · AGENTS.md 与提交规范', link: '/unit03/ai-collaboration' },
       { text: '课后练习', link: '/unit03/practice' }
     ]
   },
@@ -61,6 +65,7 @@ const units: Record<number, { title: string; items: Item[] }> = {
       { text: '4.3 事件绑定与指令总览', link: '/unit04/03-event-directive' },
       { text: '4.4 ref 与 reactive', link: '/unit04/04-reactivity' },
       { text: '4.5 响应式原理初探', link: '/unit04/05-reactivity-principle' },
+      { text: 'AI 协作 · 别让它写 Vue 2 的写法', link: '/unit04/ai-collaboration' },
       { text: '课后练习', link: '/unit04/practice' }
     ]
   },
@@ -75,6 +80,7 @@ const units: Record<number, { title: string; items: Item[] }> = {
       { text: '5.5 四态页面规范', link: '/unit05/05-four-states' },
       { text: '案例 01 · 增删改查清单', link: '/unit05/06-case-crud' },
       { text: '案例 02 · 可排序筛选的数据表格', link: '/unit05/07-case-grid' },
+      { text: 'AI 协作 · 让 AI 补上四种状态', link: '/unit05/ai-collaboration' },
       { text: '课后练习', link: '/unit05/practice' }
     ]
   },
@@ -88,6 +94,7 @@ const units: Record<number, { title: string; items: Item[] }> = {
       { text: '6.4 表单校验', link: '/unit06/04-validation' },
       { text: '6.5 生命周期与副作用清理', link: '/unit06/05-lifecycle' },
       { text: '案例 05 · Markdown 编辑器', link: '/unit06/06-case-markdown' },
+      { text: 'AI 协作 · 表单校验与副作用清理', link: '/unit06/ai-collaboration' },
       { text: '课后练习', link: '/unit06/practice' }
     ]
   },
@@ -101,6 +108,7 @@ const units: Record<number, { title: string; items: Item[] }> = {
       { text: '7.4 组件上的 v-model', link: '/unit07/04-vmodel' },
       { text: '案例 03 · 树状视图与递归组件', link: '/unit07/05-case-tree' },
       { text: '案例 09 · 可编辑表格', link: '/unit07/06-case-editable-table' },
+      { text: 'AI 协作 · 组件边界的判断', link: '/unit07/ai-collaboration' },
       { text: '课后练习', link: '/unit07/practice' }
     ]
   },
@@ -115,6 +123,7 @@ const units: Record<number, { title: string; items: Item[] }> = {
       { text: '8.5 自定义指令', link: '/unit08/05-directives' },
       { text: '案例 06 · 模态框与全局通知', link: '/unit08/06-case-modal' },
       { text: '案例 08 · 画板与撤销重做', link: '/unit08/07-case-canvas' },
+      { text: 'AI 协作 · 状态放错位置的坑', link: '/unit08/ai-collaboration' },
       { text: '课后练习', link: '/unit08/practice' }
     ]
   },
@@ -127,6 +136,7 @@ const units: Record<number, { title: string; items: Item[] }> = {
       { text: '9.3 路由守卫', link: '/unit09/03-guards' },
       { text: '9.4 登录鉴权完整链路', link: '/unit09/04-auth-flow' },
       { text: '案例 10 · 登录与鉴权', link: '/unit09/05-case-auth' },
+      { text: 'AI 协作 · 前端判断不是安全边界', link: '/unit09/ai-collaboration' },
       { text: '课后练习', link: '/unit09/practice' }
     ]
   },
@@ -140,6 +150,7 @@ const units: Record<number, { title: string; items: Item[] }> = {
       { text: '10.4 请求层封装', link: '/unit10/04-request-layer' },
       { text: '10.5 错误分层处理', link: '/unit10/05-error-handling' },
       { text: '案例 04 · 从接口获取数据', link: '/unit10/06-case-fetch' },
+      { text: 'AI 协作 · 接口约定最容易走偏', link: '/unit10/ai-collaboration' },
       { text: '课后练习', link: '/unit10/practice' }
     ]
   },
@@ -152,6 +163,7 @@ const units: Record<number, { title: string; items: Item[] }> = {
       { text: '11.3 布局骨架与嵌套路由', link: '/unit11/03-layout' },
       { text: '11.4 列表页标准做法', link: '/unit11/04-list-page' },
       { text: '11.5 表单页标准做法', link: '/unit11/05-form-page' },
+      { text: 'AI 协作 · 规格驱动开发的流程', link: '/unit11/ai-collaboration' },
       { text: '课后练习', link: '/unit11/practice' }
     ]
   },
@@ -163,6 +175,7 @@ const units: Record<number, { title: string; items: Item[] }> = {
       { text: '12.2 构建优化', link: '/unit12/02-build-optimize' },
       { text: '12.3 部署上线', link: '/unit12/03-deploy' },
       { text: '12.4 交付材料与答辩', link: '/unit12/04-delivery' },
+      { text: 'AI 协作 · 优化建议要先验证', link: '/unit12/ai-collaboration' },
       { text: '课后练习', link: '/unit12/practice' }
     ]
   }
@@ -200,7 +213,8 @@ const projectSidebar: Item[] = [
       { text: '业务规则与状态流转', link: '/project/rules' },
       { text: '接口约定', link: '/project/api' },
       { text: '目录结构与命名约定', link: '/project/structure' },
-      { text: '三阶段交付', link: '/project/milestones' }
+      { text: '三阶段交付', link: '/project/milestones' },
+      { text: 'AI 协作规范', link: '/project/ai-collaboration' }
     ]
   },
   {
@@ -243,7 +257,8 @@ const appendixSidebar: Item[] = [
       { text: 'API 速查手册', link: '/appendix/cheatsheet' },
       { text: '常见报错与排查', link: '/appendix/errors' },
       { text: '工具链与版本清单', link: '/appendix/tools' },
-      { text: '术语表', link: '/appendix/glossary' }
+      { text: '术语表', link: '/appendix/glossary' },
+      { text: 'AI 编程工具速查', link: '/appendix/ai-tools' }
     ]
   }
 ]

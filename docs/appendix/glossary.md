@@ -147,7 +147,32 @@
 只能复述定义，说明还没分清。
 :::
 
+## 九、AI 协作
+
+这一节的术语在 [AI 编程导论](/guide/ai-coding) 之后出现得越来越频繁，不需要会实现，但要知道各自管什么。
+
+| 术语（中英） | 一句话解释 | 常见误解 | 出现位置 |
+| --- | --- | --- | --- |
+| 编码代理 Coding Agent | 能读文件、改文件、跑命令的 AI 工具，不只是补全 | 以为它和代码补全是同一类。补全帮你打字，代理替你把事做完 | [导论](/guide/ai-coding) |
+| 上下文工程 Context Engineering | 决定往对话里放哪些信息，让产出更准 | 以为提示词越长越好。无关信息会稀释重点 | [4](/unit04/ai-collaboration) |
+| AGENTS.md | 放在仓库根目录、写明项目约定的 Markdown 文件，供 AI 工具读取 | 以为它是某个工具的专有配置。它是跨工具的通用格式 | [3](/unit03/ai-collaboration) |
+| 渐进式披露 Progressive Disclosure | 主文件只放导航性信息，细节按需展开 | 以为把全部内容塞进一个文件更好 | [3](/unit03/ai-collaboration) |
+| 规格驱动开发 Spec-Driven Development | 先写清要建什么、为什么建，再让 AI 按规格实现 | 以为要多写一堆文档。需求、规则、接口这几份本身就是规格 | [11](/unit11/ai-collaboration) |
+| MCP | 让 AI 连接数据库、接口、内部系统等外部服务的一套协议 | 以为要自己实现。知道它是什么、什么时候需要就够 | [导论](/guide/ai-coding) |
+| Agent Skills | 把一套流程与参考资料打包成可复用的能力，AI 按需加载 | 以为要写代码。它就是一个目录加一份 Markdown | [导论](/guide/ai-coding) |
+| 幻觉依赖 Hallucinated Dependency | AI 编出来的、仓库里不存在的包名或坐标 | 以为名字符合命名规范就一定是真的 | [2](/unit02/ai-collaboration) |
+| 提示注入 Prompt Injection | 把恶意指令藏在 AI 会读到的地方，让它执行不该执行的操作 | 以为只和安全领域有关。2026 年 3 月已出现针对编码代理的真实攻击 | [导论](/guide/ai-coding) |
+| 验证缺口 Verification Gap | 多数人知道 AI 代码不能全信，但不到一半的人每次提交前真的检查 | 以为看着跑通了就等于验证过 | [导论](/guide/ai-coding) |
+| 代码异味 Code Smell | 不立即报错、但让代码越来越难维护的写法 | 以为只有报错的问题才算问题。有研究显示 AI 代码九成以上的问题属于这一类 | [12](/unit12/ai-collaboration) |
+
+### 两对容易混的
+
+| 一对概念 | 差别一句话 |
+| --- | --- |
+| AI 补全 vs AI 代理 | 补全只在光标处给建议；代理会读文件、改多个文件、跑命令，自己完成任务 |
+| AGENTS.md vs CLAUDE.md | AGENTS.md 是跨工具通用的那个；CLAUDE.md 是 Claude Code 的原生格式，支持的配置项更多 |
+
 ---
 
 上一节：[工具链与版本清单](/appendix/tools) ·
-返回：[附录总览](/appendix/)
+下一节：[AI 编程工具速查](/appendix/ai-tools)

@@ -140,3 +140,4 @@
 - 想先弄明白前端整体的学习路径和方向 → [前端学习路线](/guide/learning-path)
 - 准备开始动手，先把环境弄干净 → [开发环境准备](/guide/environment)
 - 想知道这套教程有哪些用法 → [怎么用这套教程](/guide/how-to-use)
+- 准备开始写代码，想知道 AI 该怎么用 → [AI 编程：用之前先知道它的边界](/guide/ai-coding)
