@@ -85,6 +85,7 @@ const isSignedUp = ref(false)
 | [4.3 事件绑定与指令总览](/unit04/03-event-directive) | 事件写法、事件对象、动态参数、指令地图 | 用户操作怎么接进来 |
 | [4.4 ref 与 reactive](/unit04/04-reactivity) | 两个响应式 API 的用法、取舍与自动解包规则 | 状态怎么声明才有效 |
 | [4.5 响应式原理初探](/unit04/05-reactivity-principle) | Object.defineProperty 的局限、Proxy 的好处、依赖收集 | 出问题时能推断原因 |
+| [AI 协作 · 别让它写 Vue 2 的写法](/unit04/ai-collaboration) | Vue 2 残留写法、解构丢响应性、`.value` 在脚本与模板的差别 | 它见过太多旧代码，要靠你守住 Vue 3 |
 
 五节是递进的：4.1 讲**为什么**，4.2 和 4.3 讲**模板怎么写**，
 4.4 讲**数据怎么声明**，4.5 讲**这套机制背后的道理**。
