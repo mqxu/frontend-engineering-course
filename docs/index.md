@@ -3,7 +3,7 @@ layout: home
 
 hero:
   name: 前端工程化开发
-  text: 48 学时 · 从工程地基到项目上线
+  text: 从工程地基到项目上线
   tagline: 用一个校园活动服务平台贯穿 12 个单元。教程里的示例可以直接在页面上运行，代码可以直接抄进你的项目。
   actions:
     - theme: brand
