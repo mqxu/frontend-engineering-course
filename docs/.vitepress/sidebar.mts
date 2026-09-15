@@ -209,7 +209,8 @@ const projectSidebar: Item[] = [
     text: '综合项目 · 校园活动服务平台',
     items: [
       { text: '项目总览', link: '/project/' },
-      { text: '需求规格说明', link: '/project/requirements' },
+      { text: '管理端需求规格', link: '/project/requirements' },
+      { text: '用户端需求规格', link: '/project/mobile' },
       { text: '业务规则与状态流转', link: '/project/rules' },
       { text: '接口约定', link: '/project/api' },
       { text: '目录结构与命名约定', link: '/project/structure' },
@@ -218,7 +219,7 @@ const projectSidebar: Item[] = [
     ]
   },
   {
-    text: '参考实现',
+    text: '参考实现 · 管理端',
     collapsed: false,
     items: [
       { text: '登录与鉴权', link: '/project/impl-auth' },
@@ -226,6 +227,34 @@ const projectSidebar: Item[] = [
       { text: '报名审核模块', link: '/project/impl-signup' },
       { text: '场次与场地模块', link: '/project/impl-session' },
       { text: '数据看板', link: '/project/impl-dashboard' }
+    ]
+  },
+  {
+    text: '参考实现 · 用户端',
+    collapsed: false,
+    items: [
+      { text: '登录与登录态', link: '/project/impl-mobile-auth' },
+      { text: '活动浏览与报名', link: '/project/impl-mobile-browse' },
+      { text: '报名与我的报名', link: '/project/impl-mobile-signup' }
+    ]
+  }
+]
+
+const mobileSidebar: Item[] = [
+  {
+    text: '用户端 · uni-app 实战',
+    items: [
+      { text: '用户端总览', link: '/mobile/' },
+      { text: '1. 为什么是 uni-app', link: '/mobile/01-why-uniapp' },
+      { text: '2. 建工程：从命令到跑起来', link: '/mobile/02-scaffold' },
+      { text: '3. 页面与路由', link: '/mobile/03-pages-router' },
+      { text: '4. 布局与样式', link: '/mobile/04-layout-style' },
+      { text: '5. 组件与组件库', link: '/mobile/05-components' },
+      { text: '6. 请求封装与登录态', link: '/mobile/06-request-auth' },
+      { text: '7. 列表页与详情页', link: '/mobile/07-list-detail' },
+      { text: '8. 报名表单与我的报名', link: '/mobile/08-signup-form' },
+      { text: '9. 打包与发布', link: '/mobile/09-publish' },
+      { text: '10. AI 协作：跨端代码最容易想当然', link: '/mobile/10-ai-collaboration' }
     ]
   }
 ]
@@ -277,6 +306,7 @@ export const sidebar: DefaultTheme.Sidebar = {
   '/unit10/': unitSidebar(10),
   '/unit11/': unitSidebar(11),
   '/unit12/': unitSidebar(12),
+  '/mobile/': mobileSidebar,
   '/project/': projectSidebar,
   '/cases/': caseSidebar,
   '/appendix/': appendixSidebar

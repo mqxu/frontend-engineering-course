@@ -477,7 +477,53 @@ coverage
 
 **这就是“自动生成的文件不提交，但要在文档里说清怎么生成”这条原则。** 只做前一半会给别人添麻烦。
 
-## 五、检查清单
+## 五、用户端工程的目录
+
+用户端是**另一个工程**，不是一个目录。它由 uni-app 的模板生成，目录结构和管理端差别很大，
+这里列出来免得你第一次打开时找不到东西。
+
+```text
+activity-mobile/
+├── src/
+│   ├── pages/                  # 页面，一个页面一个目录（不要写成 xxx.vue 平铺）
+│   │   ├── activity/
+│   │   │   ├── list.vue
+│   │   │   └── detail.vue
+│   │   ├── signup/             # 报名表单
+│   │   ├── my-signup/          # 我的报名
+│   │   └── mine/               # 个人中心（含登录）
+│   ├── components/             # 自定义组件，如活动卡片
+│   ├── api/                    # 接口层，按模块拆文件（和管理端同一套约定）
+│   ├── utils/                  # request.js、auth.js、date.js、dict.js
+│   ├── static/                 # 静态资源，只放图片与字体
+│   ├── App.vue                 # 应用入口，全局样式写这里
+│   ├── main.js                 # 导出 createApp，用 createSSRApp
+│   ├── pages.json              # 页面路由表 + tabBar + 全局样式（相当于管理端的路由 + 一部分 layout）
+│   ├── manifest.json           # 各端配置：appid、h5 路由模式与 base
+│   └── uni.scss                # 全局 SCSS 变量
+├── vite.config.js
+├── index.html
+└── package.json
+```
+
+四条和管理端不一样的约定：
+
+| 约定 | 管理端 | 用户端 |
+| --- | --- | --- |
+| 路由 | 每个页面写进 `router/index.js` | 每加一个页面，**必须**往 `pages.json` 的 `pages` 数组里加一条，否则跳转 404 |
+| 页面文件位置 | `src/views/活动名/index.vue` | `src/pages/活动名/xxx.vue`，`views` 这个名字在这里不存在 |
+| 全局样式 | `src/styles/`，在 `main.js` 里引入 | 直接写 `App.vue` 的 `<style>`，小程序端只认这里 |
+| 组件库 | 装完 npm 包直接 import | 走 easycom，在 `pages.json` 里配正则，不用 import |
+
+::: warning 两个工程之间不共享代码
+用户端不能直接 `import` 管理端的 `src/utils/` —— 两边的 `uni.request` 和 `axios` 不是一回事，
+两边的环境也不同。**接口约定可以共用，工具代码必须各写一份。**
+
+判断标准很简单：一段代码里如果出现了 `window`、`document`、`localStorage`，
+它就**不能**直接搬到用户端（小程序里这些都不存在）。这是用户端 AI 协作那一篇的重点。
+:::
+
+## 六、检查清单
 
 建工程时对着这份清单过一遍。**每一项都应该能回答“是”：**
 
@@ -507,6 +553,7 @@ coverage
 - **CSS 用 BEM**，配合 `scoped`。不用 `!important`，覆盖第三方样式用 `:deep()`。
 - **自动生成的文件不提交，但要在 README 里说清怎么生成。** 只做前一半会给别人添麻烦。
 - **判断一个目录结构好不好：改一个需求时，你要在几个目录之间跳？** 越少越好。
+- **用户端是另一个工程，不是一个目录。** 接口约定共用，工具代码各写一份 —— 出现 `window` / `localStorage` 的代码搬不过去。
 
 ---
 

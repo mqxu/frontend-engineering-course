@@ -55,6 +55,7 @@
 | Pinia 与请求层 | [单元 10](/unit10/) | [请求速查](/appendix/cheatsheet#请求)、[请求类报错](/appendix/errors#请求类) |
 | 联调、构建优化与部署 | [单元 12](/unit12/) | [Vite 与构建类报错](/appendix/errors#vite-与构建类)、[工具链清单](/appendix/tools) |
 | AI 协作（贯穿全课程） | [AI 编程导论](/guide/ai-coding) | [AI 编程工具速查](/appendix/ai-tools)、[项目 AI 协作规范](/project/ai-collaboration) |
+| 用户端（uni-app 跨端） | [用户端专栏](/mobile/) | [跨端与小程序术语](/appendix/glossary)、[用户端版本表](/appendix/tools#用户端专用的工具与版本)、[跨端类报错](/appendix/errors#跨端类) |
 
 ## 怎么用这套附录配合正文
 

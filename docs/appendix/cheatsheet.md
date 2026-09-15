@@ -5,6 +5,7 @@
 
 - 表里出现 `// ✓` 的是推荐写法，`// ✗` 的是常见错误写法。
 - 代码全部基于 Vue 3.5 + Vue Router 5 + Pinia 4 的写法。
+- 最后一节 [用户端（uni-app）速查](#用户端-uni-app-速查) 是另一套 API，**不要和前面的混着用**。
 - 记不住某个东西时，用浏览器搜索：`Ctrl + F`（Windows）/ `Cmd + F`（macOS）。
 
 ## 模板语法
@@ -505,6 +506,200 @@ const pageCount = Math.ceil(total / pageSize)
 
 // ✓ 深拷贝：支持 Date、Map，比 JSON 方案好
 const copy = structuredClone(activity)
+```
+
+## 用户端（uni-app）速查
+
+这一节是[用户端专栏](/mobile/)的速查。**这里的 API 在管理端用不上，管理端的写法在这里也大多不能用。**
+
+### 页面生命周期
+
+从 `@dcloudio/uni-app` 导入，写在 `<script setup>` 里。
+
+| 钩子 | 什么时候触发 | 典型用途 |
+| --- | --- | --- |
+| `onLoad(options)` | 页面加载一次，`options` 是 URL 查询参数 | 拿 `id`、发首次请求 |
+| `onShow()` | 每次页面显示（含从后台返回） | 刷新名额、刷新列表 |
+| `onReady()` | 首次渲染完成 | 需要拿 DOM 或节点信息时 |
+| `onHide()` | 页面隐藏 | 暂停定时器 |
+| `onUnload()` | 页面销毁 | 清理定时器、取消请求 |
+| `onPullDownRefresh()` | 下拉刷新，需 `pages.json` 开 `enablePullDownRefresh` | 重置到第一页重新拉 |
+| `onReachBottom()` | 滚动到底部（默认距底 50 px 触发） | 加载下一页 |
+| `onShareAppMessage()` | 用户点右上角转发 | 小程序分享 |
+
+```vue
+<script setup>
+import { onLoad, onShow, onPullDownRefresh, onReachBottom } from '@dcloudio/uni-app'
+import { ref } from 'vue'
+
+const id = ref('')
+
+onLoad((options) => {
+  // ✓ URL 参数只能传字符串，中文要 encodeURIComponent
+  id.value = options.id
+  loadDetail()
+})
+
+onPullDownRefresh(async () => {
+  try {
+    await loadList()
+  } finally {
+    // ✓ 必须调用，否则下拉动画不会收回去
+    uni.stopPullDownRefresh()
+  }
+})
+</script>
+```
+
+### 页面跳转
+
+| API | 作用 | 注意 |
+| --- | --- | --- |
+| `uni.navigateTo({ url })` | 打开新页面，保留当前页 | 页面栈最多 10 层 |
+| `uni.redirectTo({ url })` | 关闭当前页，打开新页 | 登录成功后用它，避免返回登录页 |
+| `uni.switchTab({ url })` | 切到 tabBar 页面 | **只能跳 tabBar 页，且不能带参数** |
+| `uni.reLaunch({ url })` | 关闭所有页面再打开 | 退出登录时用 |
+| `uni.navigateBack({ delta: 1 })` | 返回上 N 层 | `delta` 默认 1 |
+
+```js
+// ✓ 参数只能拼在 url 上，中文要编码
+uni.navigateTo({ url: `/pages/activity/detail?id=${id}` })
+uni.navigateTo({ url: `/pages/activity/list?keyword=${encodeURIComponent(keyword)}` })
+
+// ✗ 这样传参收不到
+uni.navigateTo({ url: '/pages/activity/detail', params: { id } })
+```
+
+### 常用 uni API
+
+| API | 作用 | 管理端的对应物 |
+| --- | --- | --- |
+| `uni.request({ url, method, data, header })` | 发 HTTP 请求 | `axios` |
+| `uni.getStorageSync(k)` / `setStorageSync(k, v)` | 读写本地存储（同步） | `localStorage` |
+| `uni.removeStorageSync(k)` | 删一个键 | `localStorage.removeItem` |
+| `uni.showToast({ title, icon })` | 轻提示，`icon` 取 `none` 时是纯文字 | `ElMessage` |
+| `uni.showModal({ title, content, success })` | 带确认的弹窗，返回 `confirm` | `ElMessageBox.confirm` |
+| `uni.showLoading()` / `hideLoading()` | 全屏加载 | `v-loading` |
+| `uni.setNavigationBarTitle({ title })` | 改导航栏标题 | 路由 meta 里的标题 |
+| `uni.stopPullDownRefresh()` | 结束下拉刷新 | 无 |
+| `uni.login({ provider })` | 拿微信临时 `code` | 无 |
+| `uni.getSystemInfoSync()` | 拿设备信息 | `window.innerWidth` |
+
+### pages.json 必备片段
+
+```json [src/pages.json]
+{
+  "easycom": {
+    "autoscan": true,
+    "custom": {
+      "^wd-(.*)": "@wot-ui/ui/components/wd-$1/wd-$1.vue"
+    }
+  },
+  "pages": [
+    { "path": "pages/activity/list", "style": { "navigationBarTitleText": "活动", "enablePullDownRefresh": true } },
+    { "path": "pages/activity/detail", "style": { "navigationBarTitleText": "活动详情" } },
+    { "path": "pages/signup/form", "style": { "navigationBarTitleText": "报名" } },
+    { "path": "pages/my-signup/list", "style": { "navigationBarTitleText": "我的报名" } },
+    { "path": "pages/mine/index", "style": { "navigationBarTitleText": "我的" } }
+  ],
+  "tabBar": {
+    "list": [
+      { "pagePath": "pages/activity/list", "text": "活动" },
+      { "pagePath": "pages/my-signup/list", "text": "我的报名" },
+      { "pagePath": "pages/mine/index", "text": "我的" }
+    ]
+  }
+}
+```
+
+| 要点 | 说明 |
+| --- | --- |
+| `pages` 第一项 | 就是启动页 |
+| 新加页面 | **必须**在这里加一条，否则跳转失败 |
+| `enablePullDownRefresh` | 默认 `false`，不开的话 `onPullDownRefresh` 不触发 |
+| `tabBar.list` | 只能 2 到 5 项，页面必须同时在 `pages` 里 |
+| 改完配置 | 常常要重启开发服务器才生效 |
+
+### 条件编译
+
+按平台保留不同代码。**注释符号跟位置有关，写错就不生效。**
+
+| 位置 | 写法 |
+| --- | --- |
+| JS | `// #ifdef H5` … `// #endif` |
+| 模板 | `<!-- #ifdef H5 -->` … `<!-- #endif -->` |
+| 样式 | `/* #ifdef H5 */` … `/* #endif */` |
+| JSON | 用 `#ifdef` 注释（`pages.json` / `manifest.json` 支持） |
+
+```js
+// #ifdef H5
+// 只有 H5 平台会编译这段
+window.location.reload()
+// #endif
+
+// #ifdef MP-WEIXIN
+// 只有微信小程序会编译这段
+uni.showShareMenu({ withShareTicket: true })
+// #endif
+```
+
+常用平台标识：`H5`、`MP-WEIXIN`、`MP-ALIPAY`、`APP-PLUS`。
+`#ifndef` 是“不包含该平台”。
+
+### 单位与样式
+
+| 规则 | 说明 |
+| --- | --- |
+| `750rpx` 永远等于屏幕宽度 | 设计稿标注多少 px，就写多少 rpx，**不要除以 2** |
+| 什么时候用 px | 一条 1 px 的细线、阴影、`border-radius` 的极小值 |
+| 全局样式写在哪 | `App.vue` 的 `<style>`，页面背景色设在 `page` 选择器上 |
+| 安全区 | `padding-bottom: calc(20rpx + env(safe-area-inset-bottom))` |
+| 页面根节点 | 用 `<view>`，不要用 `<div>`（H5 能跑，小程序不行） |
+| 文本节点 | 用 `<text>`，短文本可以省，长文本建议加 |
+
+### Wot UI 常用组件与两个 API 差异
+
+| 组件 | 用途 |
+| --- | --- |
+| `wd-button` / `wd-cell` / `wd-cell-group` | 按钮、列表项、分组 |
+| `wd-input` / `wd-textarea` / `wd-search` | 输入、多行输入、搜索框 |
+| `wd-form` / `wd-form-item` | 表单与字段 |
+| `wd-tag` / `wd-divider` / `wd-empty` / `wd-skeleton` | 标签、分割线、空态、骨架屏 |
+| `wd-loadmore` / `wd-segmented` / `wd-popup` | 加载更多、分段筛选、弹层 |
+| `wd-toast` / `wd-dialog` | **必须写进页面模板**，否则不渲染 |
+
+两处最容易按别的库的习惯写错的：
+
+| 项 | ✗ 别的库的写法 | ✓ Wot UI 的写法 |
+| --- | --- | --- |
+| 校验规则 | `:rules="rules"` | `:schema="schema"`（配 `zodAdapter` 或自定义） |
+| 字段标签 | `label="联系方式"` | `title="联系方式"` |
+| 字段名 | `v-model` 绑一个字符串 | `prop="contact"` |
+
+```vue
+<script setup>
+import { ref } from 'vue'
+import { useToast } from '@wot-ui/ui'
+
+const form = ref(null)
+const toast = useToast()
+
+async function submit() {
+  // ✓ validate() 返回 { valid, errors }，不抛异常
+  const { valid } = await form.value.validate()
+  if (!valid) return
+  // ...提交逻辑
+}
+</script>
+
+<template>
+  <wd-form ref="form" :model="model" :schema="schema">
+    <wd-form-item title="联系方式" prop="contact">
+      <wd-input v-model="model.contact" />
+    </wd-form-item>
+  </wd-form>
+  <wd-toast />
+</template>
 ```
 
 ---

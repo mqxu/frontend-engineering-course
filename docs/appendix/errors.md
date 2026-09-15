@@ -663,6 +663,135 @@ export function uploadCoverApi(file) {
 让 axios 自己决定请求头。**"看起来更明确"的手写配置往往是错的。**
 :::
 
+## 跨端类
+
+这一节的报错只在[用户端（uni-app）](/mobile/)里出现。**共同点是：同一段代码在管理端能跑，在这里不行。**
+
+::: details 现象：页面里写了 wd-button，什么也不显示，控制台提示找不到组件
+**原因**：easycom 的路径写成了 `uni_modules` 的路径，但你是用 npm 装的。
+官方文档的示例按 `uni_modules` 安装写（路径是 `@/uni_modules/wot-ui`），npm 装的包名是 `@wot-ui/ui`。
+
+**解决**：
+
+```json [src/pages.json]
+{
+  "easycom": {
+    "autoscan": true,
+    "custom": {
+      "^wd-(.*)": "@wot-ui/ui/components/wd-$1/wd-$1.vue"
+    }
+  }
+}
+```
+
+改完**重启一次开发服务器**。`pages.json` 的改动不一定触发重新编译。
+
+**怎么预防**：照文档抄配置之前，先确认文档假设的安装方式与你实际用的方式是不是同一种。
+:::
+
+::: details 现象：从 wot-design-uni 装的组件，样式偏旧，某些属性不生效
+**原因**：这个包名已经停更，最后停在 1.14.0。新的包名是 `@wot-ui/ui`。
+
+**解决**：
+
+```bash
+# 分别查两个包的最新版本
+curl -s https://registry.npmjs.org/@wot-ui%2Fui/latest | head -c 200
+curl -s https://registry.npmjs.org/wot-design-uni/latest | head -c 200
+
+pnpm remove wot-design-uni
+pnpm add @wot-ui/ui
+```
+
+**怎么预防**：AI 给出安装命令时，**先查包名再装**。训练语料里旧名更多，它会很自信地给你旧包名。
+:::
+
+::: details 现象：页面一打开就报 window is not defined / document is not defined
+**原因**：小程序里没有浏览器那套 API。`window`、`document`、`localStorage`、`navigator` 全都不存在。
+
+**解决**：换成 uni-app 提供的等价 API。
+
+| 浏览器写法 | 用户端写法 |
+| --- | --- |
+| `localStorage.setItem(k, v)` | `uni.setStorageSync(k, v)` |
+| `window.location.href = url` | `uni.navigateTo({ url })` |
+| `document.title = x` | `pages.json` 里配 `navigationBarTitleText` |
+| `setTimeout` | 能用，但要在 `onUnload` 里清掉 |
+
+**怎么预防**：写用户端代码时，看到这几个词就停下来想一想。**管理端的工具函数不能直接复制过来。**
+:::
+
+::: details 现象：点进新加的页面，提示页面不存在，跳转失败
+**原因**：加了 `.vue` 文件，但没往 `pages.json` 的 `pages` 数组里注册。
+uni-app 的路由表是配置式的，**不是按文件目录自动生成的**。
+
+**解决**：
+
+```json [src/pages.json]
+{
+  "pages": [
+    { "path": "pages/activity/list", "style": { "navigationBarTitleText": "活动" } },
+    { "path": "pages/activity/detail", "style": { "navigationBarTitleText": "活动详情" } }
+  ]
+}
+```
+
+**怎么预防**：把“新建页面 = 建文件 + 加 `pages.json`”当成一个动作，**不要只做前半截**。
+让 AI 加页面时，明确要求它同时改 `pages.json`。
+:::
+
+::: details 现象：navigateTo 跳转失败，控制台提示页面栈超限
+**原因**：微信小程序的页面栈上限是 10 层。连续 `navigateTo` 会一直往栈里压。
+
+**解决**：按场景换 API。
+
+| 场景 | 用什么 |
+| --- | --- |
+| 从列表进详情，要能返回 | `navigateTo` |
+| 登录成功后进主页，不要返回登录页 | `redirectTo` |
+| 切到底部 tabBar 的页面 | `switchTab`（**不能带参数**） |
+| 退出登录，清空页面栈 | `reLaunch` |
+| 返回上一页 | `navigateBack` |
+
+**怎么预防**：设计跳转时先想清“要不要留返回路径”，不要一律用 `navigateTo`。
+:::
+
+::: details 现象：表单写了 rules 和 label，既不校验，标签也不显示
+**原因**：Wot UI 的表单 API 和后台常用的 Element Plus 不一样：
+校验规则用 **`schema`** 而不是 `rules`，标签属性是 **`title`** 而不是 `label`，字段名用 `prop` 绑定。
+
+**解决**：
+
+```vue
+<wd-form ref="form" :model="model" :schema="schema">
+  <wd-form-item title="联系方式" prop="contact">
+    <wd-input v-model="model.contact" />
+  </wd-form-item>
+</wd-form>
+```
+
+**怎么预防**：换组件库时先读一遍表单的 props 表，**不要按上一个库的习惯猜**。
+:::
+
+::: details 现象：调用了 useToast().success()，页面上什么都没出现
+**原因**：uni-app 不支持全局挂载组件，`<wd-toast />` 必须显式写进页面模板里。
+
+**解决**：
+
+```vue
+<template>
+  <view class="page">
+    <!-- 页面内容 -->
+  </view>
+  <!-- ✓ 这两个必须写在模板里，否则不渲染 -->
+  <wd-toast />
+  <wd-dialog />
+</template>
+```
+
+**怎么预防**：在页面骨架里就先把这两个写进去，用到的时候不用回头找。
+:::
+
 ---
 
 上一节：[API 速查手册](/appendix/cheatsheet) ·

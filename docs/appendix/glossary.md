@@ -1,6 +1,6 @@
 # 术语表
 
-收录 70 条以上容易混淆或经常出现的术语。**按四栏写：术语（中英）、一句话解释、常见误解、在本课程哪一节出现。**
+收录 80 条以上容易混淆或经常出现的术语。**按四栏写：术语（中英）、一句话解释、常见误解、在本课程哪一节出现。**
 
 读英文文档被术语卡住时，先在这里找一遍，再回去读原文。
 
@@ -147,7 +147,27 @@
 只能复述定义，说明还没分清。
 :::
 
-## 九、AI 协作
+## 九、跨端与小程序
+
+做[用户端](/mobile/)时会遇到这一组词。它们和后端的“多端”不是一回事，
+说的是**同一份前端代码怎么变成不同平台的应用**。
+
+| 术语（中英） | 一句话解释 | 常见误解 | 出现位置 |
+| --- | --- | --- | --- |
+| 跨端框架 Cross-platform Framework | 用一套代码生成多个平台应用的框架 | 以为“跨端”就是“自适应网页”。跨端产出的是真正的原生或小程序包，不是响应式布局 | [1](/mobile/01-why-uniapp) |
+| uni-app | DCloud 出的跨端框架，编译到 H5、微信小程序、App 等多个平台 | 以为它是一个运行时库。它是**编译器**，产物里没有 uni-app 本身 | [1](/mobile/01-why-uniapp) |
+| uni-app x | uni-app 的下一代，用 UTS 强类型语言，原生渲染 | 和经典版混为一谈。经典版用 JS/TS 走 WebView 混合渲染，生态完整；uni-app x 主攻 App 与鸿蒙，大量 JS npm 包不可用 | [1](/mobile/01-why-uniapp) |
+| UTS | uni-app x 用的强类型语言，语法接近 TypeScript | 以为是 TypeScript 的别名。它是编译到 Kotlin / Swift 的独立语言 | [1](/mobile/01-why-uniapp) |
+| 条件编译 Conditional Compilation | 用特殊注释包住一段代码，让它只在某个平台编译进去 | 以为它是运行时判断。它在**编译期**就把别的平台的分支删掉了 | [4](/mobile/04-layout-style) |
+| rpx | uni-app 的响应式单位，**750rpx 永远等于屏幕宽度** | 以为 rpx 是 px 的二分之一。它按屏幕宽度等比换算，与设备像素无关 | [4](/mobile/04-layout-style) |
+| easycom | uni-app 的组件自动引入机制，按正则匹配组件路径 | 以为改完配置立刻生效。`pages.json` 的改动常常要重新编译 | [5](/mobile/05-components) |
+| 页面栈 Page Stack | 当前打开的页面组成的栈，小程序最多 10 层 | 以为可以无限 `navigateTo`。超过 10 层会失败，要用 `redirectTo` 或 `reLaunch` | [3](/mobile/03-pages-router) |
+| tabBar | 底部导航栏，只能配 2 到 5 项 | 以为 tabBar 页面可以像普通页面一样 `navigateTo` 过去。它**只能**用 `switchTab`，而且不能带参数 | [3](/mobile/03-pages-router) |
+| 小程序 AppID | 小程序的身份标识，写在 `manifest.json` 里 | 以为前端能拿 AppSecret。**AppSecret 只能放在后端**，泄露等于把整个小程序交出去 | [6](/mobile/06-request-auth) |
+| code2session | 后端拿 `code` 换 `openid` 的接口 | 以为前端可以直接调。它需要 AppSecret，**必须由后端发起** | [6](/mobile/06-request-auth) |
+| Wot UI | 手机端 UI 组件库，npm 包名是 `@wot-ui/ui` | 沿用旧包名 `wot-design-uni`。旧包已停更在 1.x | [5](/mobile/05-components) |
+
+## 十、AI 协作
 
 这一节的术语在 [AI 编程导论](/guide/ai-coding) 之后出现得越来越频繁，不需要会实现，但要知道各自管什么。
 

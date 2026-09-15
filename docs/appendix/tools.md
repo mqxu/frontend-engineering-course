@@ -33,6 +33,9 @@
 | lint-staged | 17.5.1 |
 | @commitlint/cli | 21.2.2 |
 
+以上是**管理端**的基线。用户端（uni-app）用的是另一套锁定的版本，
+两张表**不能混着看**，见本文末尾的[用户端专用的工具与版本](#用户端专用的工具与版本)。
+
 ## 第一层：运行时
 
 运行时的作用是"提供一个能跑 JavaScript 的环境"。
@@ -237,6 +240,61 @@ pnpm create vue@latest
 `create-vue` 会根据你的勾选生成配套的配置，
 包括 Router、Pinia、ESLint、Prettier、Vitest。
 **手动拼容易漏配置，出了问题很难查。** 见[单元 11 的工程初始化](/unit11/02-scaffold)。
+:::
+
+## 用户端专用的工具与版本
+
+用户端（[uni-app 实战](/mobile/)）是**另一个工程**，用的是另一套依赖。
+两个工程各自独立安装，互不影响。
+
+| 名称 | 版本 | 作用 | 什么时候需要它 | 安装命令 |
+| --- | --- | --- | --- | --- |
+| uni-app 编译器 | `3.0.0-5020420260813003` | 把 `.vue` 编译成各平台产物 | 建工程时随模板装好 | 由模板提供，不单独装 |
+| `@dcloudio/uni-app` | 同编译器版本 | 提供页面生命周期钩子（`onLoad`、`onShow`、`onPullDownRefresh` 等） | 写页面时从它导入钩子 | 由模板提供 |
+| `@dcloudio/vite-plugin-uni` | 同编译器版本 | Vite 的 uni-app 插件，串起编译流程 | 写在 `vite.config.js` 里 | 由模板提供 |
+| Vite | 5.2.8 | 开发服务器 + 构建（**模板锁定，不要升到 8**） | 建工程时随模板装好 | 由模板提供 |
+| Vue | 3.4.21 | 前端框架（**模板锁定，不要升到 3.5**） | 同上 | 由模板提供 |
+| Wot UI（`@wot-ui/ui`） | 2.3.2 | 手机端 UI 组件库，通过 easycom 引入 | 要快速做出规范界面时 | `pnpm add @wot-ui/ui` |
+| sass | 1.98 以上 | 编译 `uni.scss` 与组件库的样式 | 装 Wot UI 的同时装上 | `pnpm add -D sass` |
+| 微信开发者工具 | 最新稳定版 | 打开 `dev:mp-weixin` 的产物，做真机预览与上传 | 只在做微信小程序时需要 | 官网下载，**不是 npm 包** |
+
+::: warning 两个工程的版本不要混着看
+管理端是 Vue 3.5.42 + Vite 8.3.0，用户端是 Vue 3.4.21 + Vite 5.2.8。**这不是写错了。**
+
+uni-app 官方模板把这些版本锁死了，跨端编译器与 Vite 的版本是绑定的，
+手动升级会直接编译失败。所以：**两个工程各装各的依赖，不要试图抽一个公共的 `package.json`。**
+
+原因见[用户端总览](/mobile/)里那张“一个必须提前说清的事实”的对照表。
+:::
+
+一键装齐：
+
+```bash [用户端工程初始化]
+# 1. 用官方模板创建（模板自带 Vite / Vue / uni-app 相关依赖）
+npx degit dcloudio/uni-preset-vue#vite activity-mobile
+
+# 2. 进目录装依赖
+cd activity-mobile && pnpm install
+
+# 3. 装组件库与 sass
+pnpm add @wot-ui/ui
+pnpm add -D sass
+
+# 4. 跑起来
+pnpm dev:h5          # 在浏览器里跑，最快的验证方式
+pnpm dev:mp-weixin   # 编译到小程序，产物在 dist/dev/mp-weixin
+```
+
+国内网络下 `degit` 可能连不上 GitHub，用 Gitee 兜底：
+
+```bash [连不上 GitHub 时]
+npx degit https://gitee.com/dcloud/uni-preset-vue/repository/archive/vite.zip activity-mobile
+```
+
+::: tip 装组件库之前先查包名
+`wot-design-uni` 这个包名已经停更，新的包名是 `@wot-ui/ui`。
+AI 的训练语料里旧名更多，照着 AI 给的命令装会装到一个 1.x 的旧版本。
+核实命令见[用户端 · AI 协作](/mobile/10-ai-collaboration)。
 :::
 
 ---

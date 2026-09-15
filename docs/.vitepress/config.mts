@@ -9,7 +9,7 @@ const base = process.env.DOCS_BASE ?? '/frontend-engineering-course/'
 export default defineConfig({
   lang: 'zh-CN',
   title: '前端工程化开发',
-  description: '48 学时配套教程 · Vue 3 + Vite 工程化实践 · 校园活动服务平台项目驱动',
+  description: '48 学时配套教程 · Vue 3 + Vite 工程化实践 · 校园活动服务平台项目驱动 · 管理端 Web + 用户端 uni-app 双端',
 
   head: [
     ['meta', { name: 'theme-color', content: '#42b883' }],
@@ -58,6 +58,7 @@ export default defineConfig({
       { text: '课程导学', link: '/guide/', activeMatch: '^/guide/' },
       { text: '12 个单元', link: '/unit01/', activeMatch: '^/unit' },
       { text: '综合项目', link: '/project/', activeMatch: '^/project/' },
+      { text: '用户端', link: '/mobile/', activeMatch: '^/mobile/' },
       { text: '案例库', link: '/cases/', activeMatch: '^/cases/' },
       { text: '附录', link: '/appendix/', activeMatch: '^/appendix/' }
     ],
@@ -99,7 +100,7 @@ export default defineConfig({
 
     footer: {
       message: '配套教材 · 依据 Vue 官方文档与工程实践编写',
-      copyright: '前端工程化开发 48 学时 · 校园活动服务平台项目驱动'
+      copyright: '前端工程化开发 48 学时 · 校园活动服务平台项目驱动（管理端 Vue 3 + 用户端 uni-app）'
     }
   }
 })

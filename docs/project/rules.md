@@ -455,4 +455,4 @@ export function canChangeQuota(activity, newQuota) { /* ... */ }
 
 ---
 
-上一页：[需求规格说明](/project/requirements) · 下一页：[接口约定](/project/api)
+上一页：[管理端需求规格](/project/requirements) · 下一页：[接口约定](/project/api)

@@ -1,7 +1,8 @@
 # 前端工程化开发 · 教程
 
-《前端工程化开发》课程的配套教程。48 学时，12 周，12 个单元，共 137 篇文档。
-技术主线是 Vue 3，项目主线是“校园活动服务平台 · 管理端”，从工程地基写到项目上线。
+《前端工程化开发》课程的配套教程。48 学时，12 周，12 个单元，共 152 篇文档。
+技术主线是 Vue 3，项目主线是“校园活动服务平台”，从工程地基写到项目上线 ——
+管理端是 Vue 3 + Vite 的 Web 后台，用户端是 uni-app 的 H5 / 微信小程序。
 
 在线地址：<https://mqxu.github.io/frontend-engineering-course/>
 
@@ -42,7 +43,8 @@ Node 版本要求 20.19 以上，推荐 24 LTS。
 │   ├── index.md                首页
 │   ├── guide/                  课程导学（6 篇，含 AI 编程导论）
 │   ├── unit01/ ... unit12/     12 个单元（共 101 篇，每单元含一节 AI 协作）
-│   ├── project/                综合项目规格与参考实现（12 篇）
+│   ├── project/                综合项目规格与参考实现，两端共 16 篇
+│   ├── mobile/                 用户端专栏（11 篇，uni-app 跨端）
 │   ├── cases/                  案例库（11 篇）
 │   └── appendix/               附录（6 篇）
 ├── tools/
@@ -69,8 +71,15 @@ Node 版本要求 20.19 以上，推荐 24 LTS。
 数据看板五个模块。`docs/project/` 下是这个项目的需求规格、业务规则、接口约定，
 以及五个模块的参考实现。
 
+项目还有第二个端。学生不会为了报名去开电脑，所以另有一个用手机报名的用户端，
+用 uni-app 写，一套代码编译到 H5 与微信小程序，5 个页面，和管理端共用一套后端接口。
+用户端**不占用 12 周的课时**，是管理端跑通之后的延伸内容，单独放在 `docs/mobile/`，
+共 11 篇，从“为什么是 uni-app”讲到打包发布。它的规格写在 `docs/project/mobile.md`，
+三个模块的参考实现在 `docs/project/impl-mobile-*.md`。
+
 每个单元的结构固定为：单元导学、正文若干节、课后练习。正文各节依次讲具体场景、
 原理与写法、小结、常见坑，练习只给思路和验收标准，不给完整代码。
+用户端专栏不按单元编号，每篇单独成文，篇末用“上一节 / 下一节”串起来。
 
 ## AI 协作主线
 
@@ -94,7 +103,7 @@ AI 协作节的写法见 `WRITING.md` 的“AI 协作小节的固定结构”一
 新增一篇文档的流程：
 
 1. 在对应目录新建 `.md`，文件名用 kebab-case。
-2. 在 `docs/.vitepress/sidebar.mts` 的对应单元条目里加上链接。
+2. 在 `docs/.vitepress/sidebar.mts` 的对应条目里加上链接（单元、`projectSidebar` 或 `mobileSidebar`）。
 3. 小节末尾的“上一节 / 下一节”指向真实存在的文件。
 4. 跑 `python3 tools/check.py` 到零问题。
 5. 跑 `npm run build`，确认没有渲染错误。
@@ -169,6 +178,9 @@ DOCS_BASE=/ npm run build
   这类链接要写成相对路径。
 - 代码块的语言标记要选 Shiki 认识的语言，`gitignore` 不在支持列表里，写 `.gitignore`
   文件内容时用 `bash`。
+- 用户端专栏里引用组件库时，代码示例的导入路径写 `@wot-ui/ui`（npm 安装），
+  不要抄官方文档里的 `@/uni_modules/wot-ui`（那是 uni_modules 安装的路径）。
+- 两个端的版本基线不同，正文里给出的版本号要标清是哪一个端的，不能混用。
 
 ## 版本基线
 
@@ -195,6 +207,30 @@ npm 包的版本用 registry 查：
 ```bash
 curl -s https://registry.npmjs.org/vue/latest | head -c 200
 curl -s https://registry.npmjs.org/@vue%2Fuse%2Fcore/latest | head -c 200
+```
+
+用户端用的是另一套被官方模板锁定的版本，**两张表不能混着看**：
+
+| 类别 | 版本 |
+| --- | --- |
+| 跨端框架 | uni-app（经典版） |
+| uni-app 编译器 | 3.0.0-5020420260813003 |
+| 构建 | Vite 5.2.8（模板锁定，不要升到 8） |
+| 框架 | Vue 3.4.21（模板锁定，不要升到 3.5） |
+| 路由 | 不用 vue-router，用 `pages.json` + `uni.navigateTo` 等 API |
+| 状态 | 不引入 Pinia，用 `uni.storage` + 工具函数 |
+| UI 库 | Wot UI，npm 包名是 `@wot-ui/ui` 2.3.2 |
+| 请求 | `uni.request` 自封装 |
+
+写这两张表之前要核实的地方，各给一条命令：
+
+```bash
+# 管理端
+curl -s https://registry.npmjs.org/vue/latest | head -c 200
+
+# 用户端组件库：新包名是 @wot-ui/ui，旧的 wot-design-uni 已停更在 1.14.0
+curl -s https://registry.npmjs.org/@wot-ui%2Fui/latest | head -c 200
+curl -s https://registry.npmjs.org/wot-design-uni/latest | head -c 200
 ```
 
 站点自身用 VitePress 1.6.4。VuePress 2 至今仍是 RC 状态，npm 上 `vuepress@latest`

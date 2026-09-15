@@ -141,6 +141,29 @@ git config --global core.autocrlf input
 git config --list | head -20
 ```
 
+## 第六步（可选）：用户端需要的额外工具
+
+只做管理端的话，前面五步就够了。要做 [uni-app 用户端](/mobile/) 的话，再补两样。
+
+**一、微信开发者工具**
+
+`pnpm dev:mp-weixin` 只负责把代码编译成小程序产物，产物本身不会自己跑起来 ——
+需要微信开发者工具去打开它，才能预览和真机调试。
+
+到[微信官方文档](https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html)
+下载对应系统的**稳定版**，装完用微信扫码登录。
+
+**二、一个测试用的小程序 AppID**
+
+到[微信公众平台](https://mp.weixin.qq.com/)注册一个小程序账号，拿到 `AppID`，填进
+`src/manifest.json` 的 `mp-weixin.appid`。没有 AppID 也能在开发者工具里打开，
+但**真机预览和上传体验版都需要它**。
+
+::: warning 只在需要的时候装
+这两样东西加起来几百 MB，而且不做用户端的话完全用不上。建议先把管理端做完，
+确定要做第二端了再装。
+:::
+
 ## 环境自检清单
 
 把下面每一项都跑一遍，全部打勾才算环境就绪：
