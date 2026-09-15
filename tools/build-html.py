@@ -73,7 +73,7 @@ def read_toc() -> list[tuple[str, list[tuple[str, str]]]]:
     for m in LINK_RE.finditer(text):
         title = m.group(1).replace("\\'", "'")
         link = m.group(2)
-        if link in ("/guide/", "/unit01/", "/project/", "/cases/", "/appendix/") and any(
+        if link in ("/guide/", "/unit01/", "/project/", "/cases/", "/appendix/", "/mobile/") and any(
             l == link for _, l in found
         ):
             continue
@@ -83,6 +83,7 @@ def read_toc() -> list[tuple[str, list[tuple[str, str]]]]:
     buckets: dict[str, list[tuple[str, str]]] = {
         "课程导学": [],
         "综合项目": [],
+        "用户端": [],
         "案例库": [],
         "附录": [],
     }
@@ -96,6 +97,8 @@ def read_toc() -> list[tuple[str, list[tuple[str, str]]]]:
             unit_items.setdefault(int(m.group(1)), []).append((title, link))
         elif link.startswith("/project/"):
             buckets["综合项目"].append((title, link))
+        elif link.startswith("/mobile/"):
+            buckets["用户端"].append((title, link))
         elif link.startswith("/cases/"):
             buckets["案例库"].append((title, link))
         elif link.startswith("/appendix/"):
@@ -109,6 +112,7 @@ def read_toc() -> list[tuple[str, list[tuple[str, str]]]]:
             items.extend(unit_items.get(n, []))
         sections.append((name, items))
     sections.append(("综合项目", buckets["综合项目"]))
+    sections.append(("用户端 · uni-app", buckets["用户端"]))
     sections.append(("案例库", buckets["案例库"]))
     sections.append(("附录", buckets["附录"]))
     return sections
@@ -749,7 +753,7 @@ def build() -> str:
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>前端工程化开发 · 48 学时完整教程</title>
-<meta name="description" content="12 周 48 学时完整教程，含 12 个单元、综合项目与 10 个案例">
+<meta name="description" content="12 周 48 学时完整教程，含 12 个单元、综合项目、uni-app 用户端专栏与 10 个案例">
 <style>{CSS}</style>
 </head>
 <body>
@@ -758,7 +762,7 @@ def build() -> str:
 <aside id="sidebar">
   <div class="brand">
     <h1>前端工程化开发</h1>
-    <p>48 学时 · 12 个单元 · {total_docs} 篇</p>
+    <p>48 学时 · 12 个单元 · 管理端 + 用户端 · {total_docs} 篇</p>
     <input id="tocfilter" type="search" placeholder="筛选目录…" autocomplete="off">
   </div>
   <nav>{"".join(nav_parts)}</nav>
