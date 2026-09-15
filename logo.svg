@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="前端工程化开发">
+  <rect width="32" height="32" rx="7" fill="#42b883"/>
+  <path d="M7.4 9h4.5L16 15.4 20.1 9h4.5L16 24.4 7.4 9z" fill="#ffffff"/>
+  <path d="M16 15.4 12.6 9h6.8L16 15.4z" fill="#2f7d5d"/>
+</svg>
