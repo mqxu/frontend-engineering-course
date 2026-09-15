@@ -101,9 +101,12 @@ HTTP 状态码不够用。举例：
 | `2003` | 400 | 名额不能小于已通过人数 | 在表单字段下显示错误 |
 | `2004` | 400 | 报名截止时间必须晚于当前时间 | 在表单字段下显示错误 |
 | `2005` | 400 | 名额已满 | 提示并用红字显示名额 |
+| `2006` | 400 | 已过报名截止时间 | 提示并返回活动列表 |
+| `2007` | 400 | 当前状态不可报名 | 提示活动状态，刷新详情 |
 | `3001` | 400 | 报名记录不存在 | 返回报名列表 |
 | `3002` | 400 | 报名状态不允许此操作 | 提示并刷新列表 |
 | `3003` | 400 | 驳回理由不能为空 | 在驳回对话框中显示错误 |
+| `3004` | 400 | 已报名该活动 | 提示并跳到“我的报名” |
 | `4001` | 400 | 场地或场次不存在 | 提示并返回列表页 |
 | `4002` | 400 | 场地名称已存在 | 在表单字段下显示错误 |
 | `4003` | 400 | 场次时段与已有场次冲突 | 提示冲突的场次信息 |
@@ -1023,7 +1026,315 @@ const [overview, recent, todos] = await Promise.allSettled([
 **注意用 `Promise.allSettled` 而不是 `Promise.all`**，这样某一个失败不会导致全部失败。
 :::
 
-## 十、通用约定
+## 十、学生端接口
+
+这一章是**用户端（uni-app）专用的接口**。前面第五章到第九章是管理端的接口，用户端只用到其中的登录接口，其余都需要单独一组。
+
+**先说清共同点，下面不重复：** 响应结构（`code` 加 `message` 加 `data`）、业务码、`Authorization: Bearer <token>` 鉴权、分页参数与返回结构、失败时一律 HTTP 200 靠 `code` 区分 —— 全部沿用第二章到第四章的约定。
+
+### 为什么单独开一组 `/student`
+
+用户端和管理端看的是同一批数据，用同一批接口不行吗？**三处不行：**
+
+| 差异 | 管理端 | 用户端 |
+| --- | --- | --- |
+| 能看到哪些活动 | 草稿、已下架、全部状态 | **只看得到已发布且未下架的** |
+| 权限 | 组织者只能看自己的 | 学生看所有已发布的 |
+| 字段 | 组织者姓名、待审核数这些内部信息 | 学生不需要，也不该看到 |
+
+**把过滤做在同一个接口的参数里，风险在于忘了传参数就漏数据。** 分开成两组路径，后端在路由层就把权限隔开了 —— 用户端的 token 根本访问不到 `/api/activities`。
+
+**登录接口是共用的**：`POST /api/auth/login` 管理端和学生端用同一个，因为它们都返回 `{ token, userInfo }`，区别只在 `userInfo.role` 是 `ORGANIZER`、`AUDITOR` 还是 `STUDENT`。
+
+### 学生端活动列表
+
+```
+GET /api/student/activities?page=1&pageSize=10&keyword=歌手&type=COMPETITION&status=SIGNING
+```
+
+**请求参数**
+
+| 参数 | 类型 | 必填 | 说明 |
+| --- | --- | --- | --- |
+| `page` | number | 否 | 页码，从 1 开始，默认 1 |
+| `pageSize` | number | 否 | 每页条数，默认 10，最大 50 |
+| `keyword` | string | 否 | 按标题模糊搜索 |
+| `type` | string | 否 | 活动类型筛选 |
+| `status` | string | 否 | 只看某一状态，常用 `SIGNING` |
+
+**响应**
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "list": [
+      {
+        "id": 42,
+        "title": "2026 春季校园歌手大赛",
+        "type": "COMPETITION",
+        "organizerName": "校学生会文艺部",
+        "quota": 100,
+        "approvedCount": 58,
+        "signupDeadline": "2026-04-01 18:00:00",
+        "status": "SIGNING",
+        "coverUrl": "https://cdn.example.edu.cn/activity/42.jpg"
+      }
+    ],
+    "total": 23,
+    "page": 1,
+    "pageSize": 10
+  }
+}
+```
+
+**三条约定：**
+
+**一、列表里不返回 `description`。** 活动说明可能很长，列表页不需要。**说明放在详情接口里。** 这一条直接影响首屏加载速度 —— 二十条活动各带一段 500 字的说明，响应体会大好几倍。
+
+**二、`coverUrl` 可能是 `null`。** 学生端要处理没有封面的情况，用一张默认图占位。
+
+**三、默认排序是“报名中的在前，然后按报名截止时间升序”。** 学生最关心的是“还能报名的、快截止的”，把已结束的排前面没有意义。**排序规则要写进接口文档**，否则前端不知道要不要自己排。
+
+### 活动详情（学生视角）
+
+```
+GET /api/student/activities/{id}
+```
+
+**响应**
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "id": 42,
+    "title": "2026 春季校园歌手大赛",
+    "type": "COMPETITION",
+    "organizerName": "校学生会文艺部",
+    "quota": 100,
+    "approvedCount": 58,
+    "signupDeadline": "2026-04-01 18:00:00",
+    "status": "SIGNING",
+    "offShelf": false,
+    "description": "<p>面向全校在读学生的歌唱比赛……</p>",
+    "coverUrl": "https://cdn.example.edu.cn/activity/42.jpg",
+    "mySignupStatus": null,
+    "sessions": [
+      { "id": 8, "startTime": "2026-04-10 14:00:00", "endTime": "2026-04-10 17:00:00", "venueName": "大学生活动中心 201" }
+    ]
+  }
+}
+```
+
+**两个学生端特有的字段：**
+
+| 字段 | 说明 |
+| --- | --- |
+| `mySignupStatus` | 当前登录学生对这个活动的报名状态。`null` 表示没报过。 |
+| `sessions` | 已安排的场次。学生想知道什么时候、在哪儿办。 |
+
+**`mySignupStatus` 是为学生端加的。** 有了它，详情页不用额外发一个请求去查“我报过没有”：
+
+```js
+// 有 mySignupStatus 时：一个请求就能决定按钮状态
+if (data.mySignupStatus && data.mySignupStatus !== 'CANCELLED') {
+  // 已报名，按钮显示“查看我的报名”
+}
+
+// 没有的话：还得再发一个请求查自己的报名记录，多一次往返
+```
+
+**`description` 返回的是 HTML 字符串。** 学生端用 `<rich-text>` 渲染，**不支持复杂 CSS**，所以后端返回的活动说明要用基础标签（`p`、`div`、`span`、`strong`、`img`）。
+
+**未登录也能访问这个接口**，此时 `mySignupStatus` 固定为 `null`。**这一点很重要** —— 学生端的活动列表和详情都允许未登录浏览，只有报名才要求登录。
+
+### 提交报名
+
+```
+POST /api/student/signups
+```
+
+**请求体**
+
+```json
+{
+  "activityId": 42,
+  "studentNo": "2023010101",
+  "studentClass": "软件 2301",
+  "remark": "希望安排在下午场"
+}
+```
+
+**姓名不用传** —— 从登录用户的信息里取。**这是刻意的设计：** 让学生填自己的姓名，等于允许他随便写，审核环节就没有意义了。
+
+**响应**
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "id": 1024,
+    "activityId": 42,
+    "status": "PENDING",
+    "createdAt": "2026-03-20 15:12:33"
+  }
+}
+```
+
+**后端的四道检查**（缺一不可）：
+
+| 顺序 | 检查 | 失败返回 |
+| --- | --- | --- |
+| 1 | 活动存在且未下架 | `2001` / `2007` |
+| 2 | 活动状态是 `SIGNING` | `2007` |
+| 3 | 当前时间早于 `signupDeadline` | `2006` |
+| 4 | 名额未满 | `2005` |
+| 5 | 该学生没有对同一活动的有效报名 | `3004` |
+
+**检查顺序要从便宜到贵。** 查活动状态是一次内存判断，查“是否重复报名”要扫数据库，所以重复报名的检查放在最后。
+
+::: warning 名额的并发问题
+两个学生同时提交，都查到“还剩 1 个名额”，然后都通过检查 —— **最后通过审核的是 2 个人，超了。**
+
+**这一段必须在后端用事务加行锁（或乐观锁）处理，前端做什么都防不住。** 前端能做的只有：拿到 `2005` 时刷新一下名额显示，让用户看到真实情况。
+
+**前端不要试图用“先查名额再提交”来避免这个问题** —— 那是两次请求，中间的时间差只会让问题更明显。
+:::
+
+### 我的报名列表
+
+```
+GET /api/student/signups/mine?page=1&pageSize=10&status=PENDING
+```
+
+**响应**
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "list": [
+      {
+        "id": 1024,
+        "activityId": 42,
+        "activityTitle": "2026 春季校园歌手大赛",
+        "activityStatus": "SIGNING",
+        "activityStartTime": "2026-04-10 14:00:00",
+        "venueName": "大学生活动中心 201",
+        "status": "APPROVED",
+        "remark": "希望安排在下午场",
+        "rejectReason": null,
+        "auditorName": "李老师",
+        "auditedAt": "2026-03-21 09:30:00",
+        "createdAt": "2026-03-20 15:12:33"
+      }
+    ],
+    "total": 5,
+    "page": 1,
+    "pageSize": 10
+  }
+}
+```
+
+**两个字段是特意加的：**
+
+| 字段 | 为什么 |
+| --- | --- |
+| `activityStatus` | 学生要知道活动还开着没 —— 已通过但活动结束了，和已通过且活动还开着，处理不同 |
+| `activityStartTime` 加 `venueName` | 已通过的学生最关心“什么时候、在哪儿”，不该让他再点进详情页查 |
+
+**`rejectReason` 只在 `status` 为 `REJECTED` 时有值。** 这个信息要在列表里就显示出来 —— 学生点进“我的报名”，最想看的就是“为什么被拒了”。
+
+### 取消报名
+
+```
+PUT /api/student/signups/{id}/cancel
+```
+
+**响应**
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": { "id": 1024, "status": "CANCELLED" }
+}
+```
+
+**可取消的条件：**
+
+| 条件 | 不满足时返回 |
+| --- | --- |
+| 报名记录属于当前登录学生 | `1002` |
+| 当前状态是 `PENDING` 或 `APPROVED` | `3002` |
+| 关联活动不是 `FINISHED` | `3002` |
+
+**取消后名额会被释放。** 已通过（`APPROVED`）的报名取消后，`approvedCount` 要减一 —— **这是后端的责任，但前端要在取消成功后刷新名额显示**，否则用户看到的是过期数据。
+
+**用 `PUT` 而不是 `DELETE`。** 取消不是删除记录 —— 记录还在，状态变成了 `CANCELLED`。**用 `DELETE` 的语义会让后端不好做审计（谁在什么时候取消的）。**
+
+### 微信小程序登录
+
+```
+POST /api/auth/weixin
+```
+
+**请求体**
+
+```json
+{ "code": "081Kf7Ga1abcDEF2xyz" }
+```
+
+这里的 `code` 是小程序端 `uni.login()` 拿到的临时凭证，**不是业务码那个 `code`**（同一个词，两个含义，写文档时要写清楚，否则接口评审时一定会有人问）。
+
+**响应** 与管理端登录一致：
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIs...",
+    "userInfo": {
+      "id": 501,
+      "username": null,
+      "realName": "张同学",
+      "role": "STUDENT",
+      "studentNo": "2023010101",
+      "studentClass": "软件 2301"
+    }
+  }
+}
+```
+
+::: danger AppSecret 只能在服务端
+完整链路是：小程序拿 `code` → 发给后端 → **后端带着 `code` 和 `AppSecret` 调微信的 `code2session` 接口** → 换到 `openid` → 后端查或建用户 → 签发自己的 token。
+
+**`AppSecret` 绝不能出现在前端代码里。** 它等同于小程序的最高权限，泄露了别人就能以你的小程序身份调微信接口。**前端也不需要知道 `openid`** —— 那是后端和微信之间的事。
+:::
+
+**首次登录时后端自动建用户**，姓名等信息可以后续让学生补全。**不要指望微信能给姓名和学号** —— `wx.getUserProfile` 这类接口能拿到的信息非常有限，学号必须让学生自己填或从教务系统同步。
+
+### 这一章的接口一览
+
+| 接口 | 方法 | 需要登录 | 用途 |
+| --- | --- | --- | --- |
+| `/api/student/activities` | GET | 否 | 活动列表 |
+| `/api/student/activities/{id}` | GET | 否 | 活动详情 |
+| `/api/student/signups` | POST | 是 | 提交报名 |
+| `/api/student/signups/mine` | GET | 是 | 我的报名 |
+| `/api/student/signups/{id}/cancel` | PUT | 是 | 取消报名 |
+| `/api/auth/login` | POST | 否 | 账号密码登录（与管理端共用） |
+| `/api/auth/weixin` | POST | 否 | 微信小程序登录 |
+
+**两个不需要登录的接口是刻意留着的。** 让学生先看到有什么活动，再决定要不要登录 —— 比一进来就弹登录墙的转化率高得多。
+
+## 十一、通用约定
 
 ### 什么时候用 PUT，什么时候用 PATCH
 
@@ -1078,7 +1389,7 @@ export function toBool(value) {
 
 **注意 `Boolean('false')` 是 `true`。** 这是一个经典的坑。
 
-## 十一、这份约定怎么维护
+## 十二、这份约定怎么维护
 
 ### 改动流程
 
